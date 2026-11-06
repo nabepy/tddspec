@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "requirements": [],
+  "tests": [],
+  "proposals": [],
+  "_example": {
+    "requirement": {
+      "id": "REQ-001",
+      "text": "在庫0なら注文を拒否する",
+      "source": "design"
+    },
+    "test_spec": {
+      "id": "T-001",
+      "file": "tests/spec/test_order.py",
+      "name": "test_place_rejects_when_out_of_stock",
+      "tag": "spec",
+      "covers": ["REQ-001"],
+      "status": "red"
+    },
+    "test_proposed": {
+      "id": "T-002",
+      "file": "tests/proposed/test_order_reject_style.py",
+      "name": "test_reject_raises_error",
+      "tag": "proposed",
+      "proposal": "PRP-001",
+      "status": "red"
+    },
+    "test_explore": {
+      "id": "T-003",
+      "file": "tests/explore/test_order_boundary.py",
+      "name": "test_place_with_negative_quantity",
+      "tag": "explore",
+      "status": "green"
+    },
+    "proposal": {
+      "id": "PRP-001",
+      "gap": "REQ-001の拒否の方法が未規定",
+      "status": "pending",
+      "candidates": [
+        {"id": "A", "summary": "例外を投げる", "branch": "proposal/PRP-001-a", "spec": "12/12", "explore": "8/10"},
+        {"id": "B", "summary": "結果型で返す", "branch": "proposal/PRP-001-b", "spec": "12/12", "explore": "6/10"}
+      ],
+      "chosen": null,
+      "reason": null,
+      "approved_by": null
+    },
+    "note": "このキーは検査に使われない。status は test が red/green、proposal が pending/approved/rejected。"
+  }
+}
