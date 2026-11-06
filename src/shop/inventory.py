@@ -14,7 +14,11 @@ class Inventory:
         raise NotImplementedError
 
     def place_order(self, sku, quantity):
-        """REQ-003 / REQ-004。拒否の方法は PRP-001 で人間の判断待ち。"""
+        """REQ-003 / REQ-004。在庫を超える注文は提示（offer）を返す。納期予定の決め方は PRP-002。"""
+        raise NotImplementedError
+
+    def confirm(self, offer):
+        """REQ-004。顧客が提示を承諾したときに呼ぶ。"""
         raise NotImplementedError
 
     def cancel(self, order_id):

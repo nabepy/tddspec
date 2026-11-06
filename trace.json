@@ -18,7 +18,7 @@
     },
     {
       "id": "REQ-004",
-      "text": "在庫数を超える注文は拒否し、在庫は変わらない（拒否の方法は未規定）",
+      "text": "在庫数を超える注文には、在庫数分を提供し残りは納期予定つきで後日提供する内容を提示して確認を求める。承諾で在庫数分を引き当てる",
       "source": "docs/design.md"
     },
     {
@@ -59,13 +59,24 @@
     {
       "id": "T-003",
       "file": "tests/spec/test_inventory.py",
-      "name": "test_rejected_order_keeps_stock",
+      "name": "test_short_order_presents_offer_without_changing_stock",
       "tag": "spec",
       "covers": [
         "REQ-004"
       ],
       "status": "red",
-      "description": "在庫10に11個注文すると拒否され、在庫は10のまま変わらない"
+      "description": "在庫10に13個注文すると、提供10個・残り3個・納期予定が提示され、在庫は10のまま"
+    },
+    {
+      "id": "T-007",
+      "file": "tests/spec/test_inventory.py",
+      "name": "test_confirmed_short_order_fills_available_stock",
+      "tag": "spec",
+      "covers": [
+        "REQ-004"
+      ],
+      "status": "red",
+      "description": "在庫10に13個注文して提示を承諾すると、注文IDが返り、在庫が0になる"
     },
     {
       "id": "T-004",
@@ -88,7 +99,8 @@
         "REQ-004"
       ],
       "status": "red",
-      "description": "在庫不足の注文で OutOfStockError 例外が出る（提案A）"
+      "description": "在庫不足の注文で OutOfStockError 例外が出る（提案A）",
+      "suspect": "改訂後の REQ-004（在庫分を提供し残りは納期を提示）と矛盾する。PRP-001 で候補Cが承認されたら削除する"
     },
     {
       "id": "T-006",
@@ -100,25 +112,13 @@
       ],
       "status": "red",
       "description": "数量0の注文をしても在庫は5のまま変わらない"
-    },
-    {
-      "id": "T-007",
-      "file": "tests/explore/test_order_boundary.py",
-      "name": "test_partial_fill_when_short",
-      "tag": "explore",
-      "relates": [
-        "REQ-004"
-      ],
-      "status": "red",
-      "suspect": "REQ-004（在庫を超える注文は拒否し、在庫は変わらない）と矛盾する。spec を優先し、人間に報告済み",
-      "description": "在庫5に8個注文すると在庫分だけ受け付け、在庫が0になる（REQ-004と矛盾）"
     }
   ],
   "proposals": [
     {
       "id": "PRP-001",
       "requirement": "REQ-004",
-      "gap": "REQ-004 の「拒否する」の方法が未規定",
+      "gap": "在庫数を超える注文の扱いが未規定（当初は REQ-004 の「拒否する」の方法）",
       "status": "pending",
       "candidates": [
         {
@@ -133,6 +133,42 @@
           "id": "B",
           "summary": "結果オブジェクト（accepted=False, reason）を返す",
           "rationale": "拒否が通常の業務結果として扱え、理由を画面に出しやすい",
+          "branch": null,
+          "spec": null,
+          "explore": null
+        },
+        {
+          "id": "C",
+          "summary": "在庫数分を提供し、残りは納期予定を提示して顧客に確認を求める",
+          "rationale": "nabepy の案（2026-11-06）。拒否せず販売機会を残せる。この案で設計書の REQ-004 を改訂済み",
+          "branch": null,
+          "spec": null,
+          "explore": null
+        }
+      ],
+      "chosen": null,
+      "reason": null,
+      "approved_by": null,
+      "note": "nabepy が候補Cを提示し、設計書を改訂した。承認の記録（chosen / reason / approved_by）は人間が書く"
+    },
+    {
+      "id": "PRP-002",
+      "requirement": "REQ-004",
+      "gap": "REQ-004 の納期予定の決め方が未規定",
+      "status": "pending",
+      "candidates": [
+        {
+          "id": "A",
+          "summary": "商品ごとに入荷予定日を登録し、それを納期予定にする",
+          "rationale": "実際の入荷に合った日付を出せる。入荷予定の登録が必要になる",
+          "branch": null,
+          "spec": null,
+          "explore": null
+        },
+        {
+          "id": "B",
+          "summary": "注文日に一定の日数（例: 7日）を足した日を納期予定にする",
+          "rationale": "仕組みが単純で、すぐ作れる。実際の入荷とずれることがある",
           "branch": null,
           "spec": null,
           "explore": null
