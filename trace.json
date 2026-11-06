@@ -1,8 +1,141 @@
 {
   "version": 1,
-  "requirements": [],
-  "tests": [],
-  "proposals": [],
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "text": "商品をSKUと在庫数で登録できる。再登録は上書き",
+      "source": "docs/design.md"
+    },
+    {
+      "id": "REQ-002",
+      "text": "商品の現在の在庫数を照会できる",
+      "source": "docs/design.md"
+    },
+    {
+      "id": "REQ-003",
+      "text": "在庫数以下の注文を受け付け、注文IDを返し、在庫を減らす",
+      "source": "docs/design.md"
+    },
+    {
+      "id": "REQ-004",
+      "text": "在庫数を超える注文は拒否し、在庫は変わらない（拒否の方法は未規定）",
+      "source": "docs/design.md"
+    },
+    {
+      "id": "REQ-005",
+      "text": "注文をキャンセルすると数量を在庫に戻す",
+      "source": "docs/design.md"
+    },
+    {
+      "id": "REQ-006",
+      "text": "在庫数がしきい値（既定5）を下回った商品を一覧できる",
+      "source": "docs/design.md"
+    }
+  ],
+  "tests": [
+    {
+      "id": "T-001",
+      "file": "tests/spec/test_inventory.py",
+      "name": "test_register_and_query_stock",
+      "tag": "spec",
+      "covers": [
+        "REQ-001",
+        "REQ-002"
+      ],
+      "status": "red"
+    },
+    {
+      "id": "T-002",
+      "file": "tests/spec/test_inventory.py",
+      "name": "test_place_order_within_stock_reduces_stock",
+      "tag": "spec",
+      "covers": [
+        "REQ-003"
+      ],
+      "status": "red"
+    },
+    {
+      "id": "T-003",
+      "file": "tests/spec/test_inventory.py",
+      "name": "test_rejected_order_keeps_stock",
+      "tag": "spec",
+      "covers": [
+        "REQ-004"
+      ],
+      "status": "red"
+    },
+    {
+      "id": "T-004",
+      "file": "tests/spec/test_inventory.py",
+      "name": "test_cancel_returns_stock",
+      "tag": "spec",
+      "covers": [
+        "REQ-005"
+      ],
+      "status": "red"
+    },
+    {
+      "id": "T-005",
+      "file": "tests/proposed/test_reject_style.py",
+      "name": "test_reject_raises_out_of_stock_error",
+      "tag": "proposed",
+      "proposal": "PRP-001",
+      "relates": [
+        "REQ-004"
+      ],
+      "status": "red"
+    },
+    {
+      "id": "T-006",
+      "file": "tests/explore/test_order_boundary.py",
+      "name": "test_zero_quantity_does_not_change_stock",
+      "tag": "explore",
+      "relates": [
+        "REQ-003"
+      ],
+      "status": "red"
+    },
+    {
+      "id": "T-007",
+      "file": "tests/explore/test_order_boundary.py",
+      "name": "test_partial_fill_when_short",
+      "tag": "explore",
+      "relates": [
+        "REQ-004"
+      ],
+      "status": "red",
+      "suspect": "REQ-004（在庫を超える注文は拒否し、在庫は変わらない）と矛盾する。spec を優先し、人間に報告済み"
+    }
+  ],
+  "proposals": [
+    {
+      "id": "PRP-001",
+      "requirement": "REQ-004",
+      "gap": "REQ-004 の「拒否する」の方法が未規定",
+      "status": "pending",
+      "candidates": [
+        {
+          "id": "A",
+          "summary": "OutOfStockError 例外を投げる",
+          "rationale": "呼び出し側が拒否を見落とせない。Pythonの慣習に合う",
+          "branch": null,
+          "spec": null,
+          "explore": null
+        },
+        {
+          "id": "B",
+          "summary": "結果オブジェクト（accepted=False, reason）を返す",
+          "rationale": "拒否が通常の業務結果として扱え、理由を画面に出しやすい",
+          "branch": null,
+          "spec": null,
+          "explore": null
+        }
+      ],
+      "chosen": null,
+      "reason": null,
+      "approved_by": null
+    }
+  ],
   "_example": {
     "requirement": {
       "id": "REQ-001",
@@ -14,7 +147,9 @@
       "file": "tests/spec/test_order.py",
       "name": "test_place_rejects_when_out_of_stock",
       "tag": "spec",
-      "covers": ["REQ-001"],
+      "covers": [
+        "REQ-001"
+      ],
       "status": "red"
     },
     "test_proposed": {
@@ -37,13 +172,25 @@
       "gap": "REQ-001の拒否の方法が未規定",
       "status": "pending",
       "candidates": [
-        {"id": "A", "summary": "例外を投げる", "branch": "proposal/PRP-001-a", "spec": "12/12", "explore": "8/10"},
-        {"id": "B", "summary": "結果型で返す", "branch": "proposal/PRP-001-b", "spec": "12/12", "explore": "6/10"}
+        {
+          "id": "A",
+          "summary": "例外を投げる",
+          "branch": "proposal/PRP-001-a",
+          "spec": "12/12",
+          "explore": "8/10"
+        },
+        {
+          "id": "B",
+          "summary": "結果型で返す",
+          "branch": "proposal/PRP-001-b",
+          "spec": "12/12",
+          "explore": "6/10"
+        }
       ],
       "chosen": null,
       "reason": null,
       "approved_by": null
     },
-    "note": "このキーは検査に使われない。status は test が red/green、proposal が pending/approved/rejected。"
+    "note": "このキーは検査に使われない。status は test が red/green、proposal が pending/approved/rejected。 任意: テストの relates（関連する要求ID。covers と違いカバー扱いにしない）、suspect（逸脱疑いの理由）、提案の requirement（対象の要求ID）。"
   }
 }

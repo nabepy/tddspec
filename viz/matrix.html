@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>要求テストマトリクス</title><style>
+:root{--bg:#fff;--fg:#1f2328;--muted:#656d76;--line:#d0d7de;--head:#f6f8fa;
+--gray:#e6e8eb;--gray-fg:#57606a;--orange:#fff1e0;--orange-fg:#9a4b00;--orange-bd:#f0a35a;
+--red:#ffe4e4;--red-fg:#b42318;--red-bd:#f08080;--green:#dcf5e3;--green-fg:#1a7f37}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--line:#30363d;
+--head:#161b22;--gray:#21262d;--gray-fg:#8d96a0;--orange:#3a2410;--orange-fg:#f5b26b;--orange-bd:#9a5a1a;
+--red:#3d1416;--red-fg:#ff8a80;--red-bd:#a33a3a;--green:#12301d;--green-fg:#5fd38a}}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 16px;background:var(--bg);color:var(--fg);
+font:14px/1.5 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
+main{max-width:1100px;margin:0 auto}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px}
+.muted{color:var(--muted)}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:120px}
+.stat b{display:block;font-size:20px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:8px 0 12px;font-size:13px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px;border:1px solid var(--line)}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:6px 8px;text-align:center;vertical-align:middle}
+th{background:var(--head);font-weight:600}
+th.req,td.req{text-align:left;min-width:260px;position:sticky;left:0;background:var(--bg);z-index:1}
+thead th.req{background:var(--head)}
+.tcol{font-size:12px;min-width:84px}
+.tcol .tid{font-weight:700;font-size:13px}
+.badge{display:inline-block;font-size:11px;padding:0 6px;border-radius:10px;margin-top:2px}
+.st-red{background:var(--red);color:var(--red-fg)}.st-green{background:var(--green);color:var(--green-fg)}
+.tag-spec{background:var(--head);color:var(--fg);border:1px solid var(--line)}
+.tag-proposed,.tag-explore{background:var(--orange);color:var(--orange-fg)}
+th.orphan{background:var(--orange);box-shadow:inset 0 3px 0 var(--orange-bd)}
+th.suspect{background:var(--red);box-shadow:inset 0 3px 0 var(--red-bd)}
+tr.uncovered td{background:var(--gray);color:var(--gray-fg)}
+tr.deviation td.req{box-shadow:inset 4px 0 0 var(--red-bd)}
+tr.outside td.req{background:var(--orange);color:var(--orange-fg)}
+td.c-cov{font-size:16px}
+td.c-rel{color:var(--muted)}
+td.c-sus{background:var(--red)!important;color:var(--red-fg)}
+td.c-out{background:var(--orange)}
+.rid{font-weight:700;margin-right:6px}
+.flag{white-space:nowrap;font-size:11px;margin-left:6px;padding:0 6px;border-radius:10px}
+.flag.gray{background:var(--bg);color:var(--gray-fg);border:1px solid var(--line)}
+.flag.red{background:var(--red);color:var(--red-fg)}
+.flag.orange{background:var(--orange);color:var(--orange-fg)}
+.card{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:8px 0}
+.card.pending{border-left:4px solid var(--orange-bd)}
+.card.sus{border-left:4px solid var(--red-bd)}
+.card h3{font-size:14px;margin:0 0 6px}
+.cands{margin:6px 0 0;padding-left:18px}
+</style></head>
+<body><main>
+<h1>要求 × テスト マトリクス</h1>
+<div class="muted">trace.json から生成 ・ 2026-11-06 13:13</div>
+<div class="stats"><div class="stat"><span class="muted">要求</span><b>6</b></div><div class="stat"><span class="muted">spec でカバー</span><b>5/6</b></div><div class="stat"><span class="muted">テスト</span><b>7（RED 7）</b></div><div class="stat"><span class="muted">承認待ちの提案</span><b>1</b></div><div class="stat"><span class="muted">逸脱疑い</span><b>1</b></div></div>
+<div class="legend"><span><span class="sw" style="background:var(--gray)"></span>灰: 未カバーの要求</span><span><span class="sw" style="background:var(--orange)"></span>橙: 要求に紐づかないテスト</span><span><span class="sw" style="background:var(--red)"></span>赤: 逸脱疑い</span><span>● covers ・ ○ relates（カバー扱いにしない） ・ ◆ 設計書外</span></div>
+<div class="wrap"><table><thead><tr><th class="req">要求 \ テスト</th><th class="tcol" title="tests/spec/test_inventory.py::test_register_and_query_stock"><div class="tid">T-001</div><span class="badge tag-spec">spec</span><br><span class="badge st-red">RED</span></th><th class="tcol" title="tests/spec/test_inventory.py::test_place_order_within_stock_reduces_stock"><div class="tid">T-002</div><span class="badge tag-spec">spec</span><br><span class="badge st-red">RED</span></th><th class="tcol" title="tests/spec/test_inventory.py::test_rejected_order_keeps_stock"><div class="tid">T-003</div><span class="badge tag-spec">spec</span><br><span class="badge st-red">RED</span></th><th class="tcol" title="tests/spec/test_inventory.py::test_cancel_returns_stock"><div class="tid">T-004</div><span class="badge tag-spec">spec</span><br><span class="badge st-red">RED</span></th><th class="tcol orphan" title="tests/proposed/test_reject_style.py::test_reject_raises_out_of_stock_error"><div class="tid">T-005</div><span class="badge tag-proposed">proposed</span><br><span class="badge st-red">RED</span></th><th class="tcol orphan" title="tests/explore/test_order_boundary.py::test_zero_quantity_does_not_change_stock"><div class="tid">T-006</div><span class="badge tag-explore">explore</span><br><span class="badge st-red">RED</span></th><th class="tcol suspect" title="tests/explore/test_order_boundary.py::test_partial_fill_when_short"><div class="tid">T-007</div><span class="badge tag-explore">explore</span><br><span class="badge st-red">RED</span></th></tr></thead><tbody><tr class=""><td class="req"><span class="rid">REQ-001</span>商品をSKUと在庫数で登録できる。再登録は上書き</td><td class="c-cov" title="covers">●</td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class=""><td class="req"><span class="rid">REQ-002</span>商品の現在の在庫数を照会できる</td><td class="c-cov" title="covers">●</td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class=""><td class="req"><span class="rid">REQ-003</span>在庫数以下の注文を受け付け、注文IDを返し、在庫を減らす</td><td class=""></td><td class="c-cov" title="covers">●</td><td class=""></td><td class=""></td><td class=""></td><td class="c-rel" title="relates">○</td><td class=""></td></tr><tr class="deviation"><td class="req"><span class="rid">REQ-004</span>在庫数を超える注文は拒否し、在庫は変わらない（拒否の方法は未規定）<span class="flag red">逸脱疑い</span><span class="flag orange">承認待ちの提案</span></td><td class=""></td><td class=""></td><td class="c-cov" title="covers">●</td><td class=""></td><td class="c-rel" title="relates">○</td><td class=""></td><td class="c-rel c-sus" title="relates">○</td></tr><tr class=""><td class="req"><span class="rid">REQ-005</span>注文をキャンセルすると数量を在庫に戻す</td><td class=""></td><td class=""></td><td class=""></td><td class="c-cov" title="covers">●</td><td class=""></td><td class=""></td><td class=""></td></tr><tr class="uncovered"><td class="req"><span class="rid">REQ-006</span>在庫数がしきい値（既定5）を下回った商品を一覧できる<span class="flag gray">未カバー</span></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class="outside"><td class="req"><span class="rid">設計書外</span>要求をカバーしないテスト（proposed / explore）</td><td></td><td></td><td></td><td></td><td class="c-out">◆</td><td class="c-out">◆</td><td class="c-out">◆</td></tr></tbody></table></div>
+<h2>承認待ちの提案</h2><div class="card pending"><h3>PRP-001（REQ-004）: REQ-004 の「拒否する」の方法が未規定</h3><div class="muted">状態: 承認待ち ・ 提案テスト: T-005</div><ul class="cands"><li><b>A</b>: OutOfStockError 例外を投げる <span class="muted">— 呼び出し側が拒否を見落とせない。Pythonの慣習に合う</span></li><li><b>B</b>: 結果オブジェクト（accepted=False, reason）を返す <span class="muted">— 拒否が通常の業務結果として扱え、理由を画面に出しやすい</span></li></ul></div>
+<h2>逸脱疑い（spec を優先し、人間が判断する）</h2><div class="card sus"><h3>T-007 test_partial_fill_when_short</h3><div>REQ-004（在庫を超える注文は拒否し、在庫は変わらない）と矛盾する。spec を優先し、人間に報告済み</div><div class="muted">tests/explore/test_order_boundary.py</div></div>
+</main></body></html>
