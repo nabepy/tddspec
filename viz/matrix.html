@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>要求テストマトリクス</title><style>
+:root{--bg:#fff;--fg:#1f2328;--muted:#656d76;--line:#d0d7de;--head:#f6f8fa;
+--gray:#e6e8eb;--gray-fg:#57606a;--orange:#fff1e0;--orange-fg:#9a4b00;--orange-bd:#f0a35a;
+--red:#ffe4e4;--red-fg:#b42318;--red-bd:#f08080;--green:#dcf5e3;--green-fg:#1a7f37}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--line:#30363d;
+--head:#161b22;--gray:#21262d;--gray-fg:#8d96a0;--orange:#3a2410;--orange-fg:#f5b26b;--orange-bd:#9a5a1a;
+--red:#3d1416;--red-fg:#ff8a80;--red-bd:#a33a3a;--green:#12301d;--green-fg:#5fd38a}}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 16px;background:var(--bg);color:var(--fg);
+font:14px/1.5 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
+main{max-width:1400px;margin:0 auto}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px}
+.muted{color:var(--muted)}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:120px}
+.stat b{display:block;font-size:20px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:8px 0 12px;font-size:13px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px;border:1px solid var(--line)}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:6px 8px;text-align:center;vertical-align:middle}
+th{background:var(--head);font-weight:600}
+th.req,td.req{text-align:left;min-width:220px;position:sticky;left:0;background:var(--bg);z-index:1}
+thead th.req{background:var(--head)}
+.tcol{font-size:12px;min-width:120px;max-width:170px;vertical-align:top}
+.tdesc{font-weight:400;text-align:left;margin-top:6px;line-height:1.4;color:var(--fg)}
+.tcol .tid{font-weight:700;font-size:13px}
+.badge{display:inline-block;font-size:11px;padding:0 6px;border-radius:10px;margin-top:2px}
+.st-red{background:var(--red);color:var(--red-fg)}.st-green{background:var(--green);color:var(--green-fg)}
+.tag-spec{background:var(--head);color:var(--fg);border:1px solid var(--line)}
+.tag-proposed,.tag-explore{background:var(--orange);color:var(--orange-fg)}
+th.orphan{background:var(--orange);box-shadow:inset 0 3px 0 var(--orange-bd)}
+th.suspect{background:var(--red);box-shadow:inset 0 3px 0 var(--red-bd)}
+tr.uncovered td{background:var(--gray);color:var(--gray-fg)}
+tr.deviation td.req{box-shadow:inset 4px 0 0 var(--red-bd)}
+tr.outside td.req{background:var(--orange);color:var(--orange-fg)}
+td.c-cov{font-size:16px}
+td.c-rel{color:var(--muted)}
+td.c-sus{background:var(--red)!important;color:var(--red-fg)}
+td.c-out{background:var(--orange)}
+.rid{font-weight:700;margin-right:6px}
+.flag{white-space:nowrap;font-size:11px;margin-left:6px;padding:0 6px;border-radius:10px}
+.flag.gray{background:var(--bg);color:var(--gray-fg);border:1px solid var(--line)}
+.flag.red{background:var(--red);color:var(--red-fg)}
+.flag.orange{background:var(--orange);color:var(--orange-fg)}
+.card{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:8px 0}
+.card.pending{border-left:4px solid var(--orange-bd)}
+.card.sus{border-left:4px solid var(--red-bd)}
+.card h3{font-size:14px;margin:0 0 6px}
+.cands{margin:6px 0 0;padding-left:18px}
+.tcol .tid a{color:inherit}
+details.test{border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:8px 12px}
+details.test.sus{border-left:4px solid var(--red-bd)}
+details.test summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+details.test summary code{font-size:13px;word-break:break-all}
+.intent{margin:8px 0;color:var(--fg)}
+pre{background:var(--head);border:1px solid var(--line);border-radius:6px;padding:10px;overflow-x:auto;font-size:12.5px;line-height:1.45;margin:6px 0 0}
+.tools{display:flex;gap:8px;margin-bottom:4px}
+.tools button{font:inherit;font-size:12px;padding:3px 10px;border:1px solid var(--line);border-radius:6px;background:var(--head);color:var(--fg);cursor:pointer}
+</style></head>
+<body><main>
+<h1>要求 × テスト マトリクス</h1>
+<div class="muted">trace.json から生成 ・ 2026-11-06 13:45</div>
+<div class="stats"><div class="stat"><span class="muted">要求</span><b>6</b></div><div class="stat"><span class="muted">spec でカバー</span><b>5/6</b></div><div class="stat"><span class="muted">テスト</span><b>7（RED 7）</b></div><div class="stat"><span class="muted">承認待ちの提案</span><b>2</b></div><div class="stat"><span class="muted">逸脱疑い</span><b>1</b></div></div>
+<div class="legend"><span><span class="sw" style="background:var(--gray)"></span>灰: 未カバーの要求</span><span><span class="sw" style="background:var(--orange)"></span>橙: 要求に紐づかないテスト</span><span><span class="sw" style="background:var(--red)"></span>赤: 逸脱疑い</span><span>● covers ・ ○ relates（カバー扱いにしない） ・ ◆ 設計書外</span></div>
+<div class="wrap"><table><thead><tr><th class="req">要求 \ テスト</th><th class="tcol" title="tests/spec/test_inventory.py::test_register_and_query_stock
+T-001 covers REQ-001, REQ-002"><div class="tid"><a href="#T-001">T-001</a></div><span class="badge tag-spec">spec</span><br><span class="badge st-red">RED</span><div class="tdesc">商品を登録すると在庫数を照会でき、同じSKUを再登録すると在庫数が上書きされる</div></th><th class="tcol" title="tests/spec/test_inventory.py::test_place_order_within_stock_reduces_stock
+T-002 covers REQ-003"><div class="tid"><a href="#T-002">T-002</a></div><span class="badge tag-spec">spec</span><br><span class="badge st-red">RED</span><div class="tdesc">在庫10に10個注文すると受け付けられ、注文IDが返り、在庫が0になる</div></th><th class="tcol" title="tests/spec/test_inventory.py::test_short_order_presents_offer_without_changing_stock
+T-003 covers REQ-004
+在庫を超える注文は、在庫数分と残り（納期予定つき）を提示するだけで、在庫はまだ変えない。"><div class="tid"><a href="#T-003">T-003</a></div><span class="badge tag-spec">spec</span><br><span class="badge st-red">RED</span><div class="tdesc">在庫10に13個注文すると、提供10個・残り3個・納期予定が提示され、在庫は10のまま</div></th><th class="tcol" title="tests/spec/test_inventory.py::test_confirmed_short_order_fills_available_stock
+T-007 covers REQ-004
+提示を顧客が承諾すると、注文IDが返り、在庫数分が引き当てられて在庫が0になる。"><div class="tid"><a href="#T-007">T-007</a></div><span class="badge tag-spec">spec</span><br><span class="badge st-red">RED</span><div class="tdesc">在庫10に13個注文して提示を承諾すると、注文IDが返り、在庫が0になる</div></th><th class="tcol" title="tests/spec/test_inventory.py::test_cancel_returns_stock
+T-004 covers REQ-005"><div class="tid"><a href="#T-004">T-004</a></div><span class="badge tag-spec">spec</span><br><span class="badge st-red">RED</span><div class="tdesc">4個の注文をキャンセルすると、在庫が10に戻る</div></th><th class="tcol suspect" title="tests/proposed/test_reject_style.py::test_reject_raises_out_of_stock_error
+T-005 proposal PRP-001（候補A）"><div class="tid"><a href="#T-005">T-005</a></div><span class="badge tag-proposed">proposed</span><br><span class="badge st-red">RED</span><div class="tdesc">在庫不足の注文で OutOfStockError 例外が出る（提案A）</div></th><th class="tcol orphan" title="tests/explore/test_order_boundary.py::test_zero_quantity_does_not_change_stock
+T-006 数量0の注文は、在庫を変えずに受け付けない（未規定。探索で挙動を固める）"><div class="tid"><a href="#T-006">T-006</a></div><span class="badge tag-explore">explore</span><br><span class="badge st-red">RED</span><div class="tdesc">数量0の注文をしても在庫は5のまま変わらない</div></th></tr></thead><tbody><tr class=""><td class="req"><span class="rid">REQ-001</span>商品をSKUと在庫数で登録できる。再登録は上書き</td><td class="c-cov" title="covers">●</td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class=""><td class="req"><span class="rid">REQ-002</span>商品の現在の在庫数を照会できる</td><td class="c-cov" title="covers">●</td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class=""><td class="req"><span class="rid">REQ-003</span>在庫数以下の注文を受け付け、注文IDを返し、在庫を減らす</td><td class=""></td><td class="c-cov" title="covers">●</td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class="c-rel" title="relates">○</td></tr><tr class="deviation"><td class="req"><span class="rid">REQ-004</span>在庫数を超える注文には、在庫数分を提供し残りは納期予定つきで後日提供する内容を提示して確認を求める。承諾で在庫数分を引き当てる<span class="flag red">逸脱疑い</span><span class="flag orange">承認待ちの提案</span></td><td class=""></td><td class=""></td><td class="c-cov" title="covers">●</td><td class="c-cov" title="covers">●</td><td class=""></td><td class="c-rel c-sus" title="relates">○</td><td class=""></td></tr><tr class=""><td class="req"><span class="rid">REQ-005</span>注文をキャンセルすると数量を在庫に戻す</td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class="c-cov" title="covers">●</td><td class=""></td><td class=""></td></tr><tr class="uncovered"><td class="req"><span class="rid">REQ-006</span>在庫数がしきい値（既定5）を下回った商品を一覧できる<span class="flag gray">未カバー</span></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class="outside"><td class="req"><span class="rid">設計書外</span>要求をカバーしないテスト（proposed / explore）</td><td></td><td></td><td></td><td></td><td></td><td class="c-out">◆</td><td class="c-out">◆</td></tr></tbody></table></div>
+<h2>テストの内容</h2>
+<p class="muted">表頭のテストIDを押すと該当のテストが開きます。太字の説明は trace.json の description、その下はテスト関数の直前のコメントです。</p>
+<div class="tools"><button type="button" onclick="document.querySelectorAll('details.test').forEach(d=>d.open=true)">すべて開く</button>
+<button type="button" onclick="document.querySelectorAll('details.test').forEach(d=>d.open=false)">すべて閉じる</button></div>
+<details class="test" id="T-001"><summary><b>T-001</b> <code>test_register_and_query_stock</code> <span class="badge tag-spec">spec</span> <span class="badge st-red">RED</span> <span class="muted">covers REQ-001, REQ-002</span></summary><div class="intent"><div><b>商品を登録すると在庫数を照会でき、同じSKUを再登録すると在庫数が上書きされる</b></div><div class="muted">T-001 covers REQ-001, REQ-002</div></div><pre><code>def test_register_and_query_stock(self):
+    inv = Inventory()
+    inv.register(&quot;SKU-A&quot;, 10)
+    self.assertEqual(inv.stock(&quot;SKU-A&quot;), 10)
+    inv.register(&quot;SKU-A&quot;, 3)
+    self.assertEqual(inv.stock(&quot;SKU-A&quot;), 3)
+（tests/spec/test_inventory.py の 9〜14行目）</code></pre></details><details class="test" id="T-002"><summary><b>T-002</b> <code>test_place_order_within_stock_reduces_stock</code> <span class="badge tag-spec">spec</span> <span class="badge st-red">RED</span> <span class="muted">covers REQ-003</span></summary><div class="intent"><div><b>在庫10に10個注文すると受け付けられ、注文IDが返り、在庫が0になる</b></div><div class="muted">T-002 covers REQ-003</div></div><pre><code>def test_place_order_within_stock_reduces_stock(self):
+    order_id = self.inv.place_order(&quot;SKU-A&quot;, 10)
+    self.assertIsNotNone(order_id)
+    self.assertEqual(self.inv.stock(&quot;SKU-A&quot;), 0)
+（tests/spec/test_inventory.py の 23〜26行目）</code></pre></details><details class="test" id="T-003"><summary><b>T-003</b> <code>test_short_order_presents_offer_without_changing_stock</code> <span class="badge tag-spec">spec</span> <span class="badge st-red">RED</span> <span class="muted">covers REQ-004</span></summary><div class="intent"><div><b>在庫10に13個注文すると、提供10個・残り3個・納期予定が提示され、在庫は10のまま</b></div><div class="muted">T-003 covers REQ-004</div><div class="muted">在庫を超える注文は、在庫数分と残り（納期予定つき）を提示するだけで、在庫はまだ変えない。</div></div><pre><code>def test_short_order_presents_offer_without_changing_stock(self):
+    offer = self.inv.place_order(&quot;SKU-A&quot;, 13)
+    self.assertEqual(offer.available, 10)
+    self.assertEqual(offer.backorder, 3)
+    self.assertIsNotNone(offer.expected_date)  # 決め方は PRP-002 で人間の判断待ち
+    self.assertEqual(self.inv.stock(&quot;SKU-A&quot;), 10)
+（tests/spec/test_inventory.py の 30〜35行目）</code></pre></details><details class="test" id="T-007"><summary><b>T-007</b> <code>test_confirmed_short_order_fills_available_stock</code> <span class="badge tag-spec">spec</span> <span class="badge st-red">RED</span> <span class="muted">covers REQ-004</span></summary><div class="intent"><div><b>在庫10に13個注文して提示を承諾すると、注文IDが返り、在庫が0になる</b></div><div class="muted">T-007 covers REQ-004</div><div class="muted">提示を顧客が承諾すると、注文IDが返り、在庫数分が引き当てられて在庫が0になる。</div></div><pre><code>def test_confirmed_short_order_fills_available_stock(self):
+    offer = self.inv.place_order(&quot;SKU-A&quot;, 13)
+    order_id = self.inv.confirm(offer)
+    self.assertIsNotNone(order_id)
+    self.assertEqual(self.inv.stock(&quot;SKU-A&quot;), 0)
+（tests/spec/test_inventory.py の 39〜43行目）</code></pre></details><details class="test" id="T-004"><summary><b>T-004</b> <code>test_cancel_returns_stock</code> <span class="badge tag-spec">spec</span> <span class="badge st-red">RED</span> <span class="muted">covers REQ-005</span></summary><div class="intent"><div><b>4個の注文をキャンセルすると、在庫が10に戻る</b></div><div class="muted">T-004 covers REQ-005</div></div><pre><code>def test_cancel_returns_stock(self):
+    order_id = self.inv.place_order(&quot;SKU-A&quot;, 4)
+    self.inv.cancel(order_id)
+    self.assertEqual(self.inv.stock(&quot;SKU-A&quot;), 10)
+（tests/spec/test_inventory.py の 46〜49行目）</code></pre></details><details class="test sus" id="T-005"><summary><b>T-005</b> <code>test_reject_raises_out_of_stock_error</code> <span class="badge tag-proposed">proposed</span> <span class="badge st-red">RED</span> <span class="muted">relates REQ-004</span> <span class="muted">proposal PRP-001</span></summary><div class="intent"><div><b>在庫不足の注文で OutOfStockError 例外が出る（提案A）</b></div><div class="muted">T-005 proposal PRP-001（候補A）</div></div><pre><code>def test_reject_raises_out_of_stock_error(self):
+    from shop.inventory import OutOfStockError  # 候補Aが採用されたら定義する
+
+    inv = Inventory()
+    inv.register(&quot;SKU-A&quot;, 1)
+    with self.assertRaises(OutOfStockError):
+        inv.place_order(&quot;SKU-A&quot;, 2)
+（tests/proposed/test_reject_style.py の 9〜15行目）</code></pre></details><details class="test" id="T-006"><summary><b>T-006</b> <code>test_zero_quantity_does_not_change_stock</code> <span class="badge tag-explore">explore</span> <span class="badge st-red">RED</span> <span class="muted">relates REQ-003</span></summary><div class="intent"><div><b>数量0の注文をしても在庫は5のまま変わらない</b></div><div class="muted">T-006 数量0の注文は、在庫を変えずに受け付けない（未規定。探索で挙動を固める）</div></div><pre><code>def test_zero_quantity_does_not_change_stock(self):
+    try:
+        self.inv.place_order(&quot;SKU-A&quot;, 0)
+    except NotImplementedError:
+        raise
+    except Exception:
+        pass
+    self.assertEqual(self.inv.stock(&quot;SKU-A&quot;), 5)
+（tests/explore/test_order_boundary.py の 13〜20行目）</code></pre></details>
+<h2>承認待ちの提案</h2><div class="card pending"><h3>PRP-001（REQ-004）: 在庫数を超える注文の扱いが未規定（当初は REQ-004 の「拒否する」の方法）</h3><div class="muted">状態: 承認待ち ・ 提案テスト: T-005</div><ul class="cands"><li><b>A</b>: OutOfStockError 例外を投げる <span class="muted">— 呼び出し側が拒否を見落とせない。Pythonの慣習に合う</span></li><li><b>B</b>: 結果オブジェクト（accepted=False, reason）を返す <span class="muted">— 拒否が通常の業務結果として扱え、理由を画面に出しやすい</span></li><li><b>C</b>: 在庫数分を提供し、残りは納期予定を提示して顧客に確認を求める <span class="muted">— nabepy の案（2026-11-06）。拒否せず販売機会を残せる。この案で設計書の REQ-004 を改訂済み</span></li></ul></div><div class="card pending"><h3>PRP-002（REQ-004）: REQ-004 の納期予定の決め方が未規定</h3><div class="muted">状態: 承認待ち ・ 提案テスト: なし</div><ul class="cands"><li><b>A</b>: 商品ごとに入荷予定日を登録し、それを納期予定にする <span class="muted">— 実際の入荷に合った日付を出せる。入荷予定の登録が必要になる</span></li><li><b>B</b>: 注文日に一定の日数（例: 7日）を足した日を納期予定にする <span class="muted">— 仕組みが単純で、すぐ作れる。実際の入荷とずれることがある</span></li></ul></div>
+<h2>逸脱疑い（spec を優先し、人間が判断する）</h2><div class="card sus"><h3>T-005 test_reject_raises_out_of_stock_error</h3><div>改訂後の REQ-004（在庫分を提供し残りは納期を提示）と矛盾する。PRP-001 で候補Cが承認されたら削除する</div><div class="muted">tests/proposed/test_reject_style.py</div></div>
+</main>
+<script>
+function openTarget(){var d=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(d&&d.tagName==="DETAILS")d.open=true;}
+window.addEventListener("hashchange",openTarget);openTarget();
+</script></body></html>

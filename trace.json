@@ -1,8 +1,184 @@
 {
   "version": 1,
-  "requirements": [],
-  "tests": [],
-  "proposals": [],
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "text": "商品をSKUと在庫数で登録できる。再登録は上書き",
+      "source": "docs/design.md"
+    },
+    {
+      "id": "REQ-002",
+      "text": "商品の現在の在庫数を照会できる",
+      "source": "docs/design.md"
+    },
+    {
+      "id": "REQ-003",
+      "text": "在庫数以下の注文を受け付け、注文IDを返し、在庫を減らす",
+      "source": "docs/design.md"
+    },
+    {
+      "id": "REQ-004",
+      "text": "在庫数を超える注文には、在庫数分を提供し残りは納期予定つきで後日提供する内容を提示して確認を求める。承諾で在庫数分を引き当てる",
+      "source": "docs/design.md"
+    },
+    {
+      "id": "REQ-005",
+      "text": "注文をキャンセルすると数量を在庫に戻す",
+      "source": "docs/design.md"
+    },
+    {
+      "id": "REQ-006",
+      "text": "在庫数がしきい値（既定5）を下回った商品を一覧できる",
+      "source": "docs/design.md"
+    }
+  ],
+  "tests": [
+    {
+      "id": "T-001",
+      "file": "tests/spec/test_inventory.py",
+      "name": "test_register_and_query_stock",
+      "tag": "spec",
+      "covers": [
+        "REQ-001",
+        "REQ-002"
+      ],
+      "status": "red",
+      "description": "商品を登録すると在庫数を照会でき、同じSKUを再登録すると在庫数が上書きされる"
+    },
+    {
+      "id": "T-002",
+      "file": "tests/spec/test_inventory.py",
+      "name": "test_place_order_within_stock_reduces_stock",
+      "tag": "spec",
+      "covers": [
+        "REQ-003"
+      ],
+      "status": "red",
+      "description": "在庫10に10個注文すると受け付けられ、注文IDが返り、在庫が0になる"
+    },
+    {
+      "id": "T-003",
+      "file": "tests/spec/test_inventory.py",
+      "name": "test_short_order_presents_offer_without_changing_stock",
+      "tag": "spec",
+      "covers": [
+        "REQ-004"
+      ],
+      "status": "red",
+      "description": "在庫10に13個注文すると、提供10個・残り3個・納期予定が提示され、在庫は10のまま"
+    },
+    {
+      "id": "T-007",
+      "file": "tests/spec/test_inventory.py",
+      "name": "test_confirmed_short_order_fills_available_stock",
+      "tag": "spec",
+      "covers": [
+        "REQ-004"
+      ],
+      "status": "red",
+      "description": "在庫10に13個注文して提示を承諾すると、注文IDが返り、在庫が0になる"
+    },
+    {
+      "id": "T-004",
+      "file": "tests/spec/test_inventory.py",
+      "name": "test_cancel_returns_stock",
+      "tag": "spec",
+      "covers": [
+        "REQ-005"
+      ],
+      "status": "red",
+      "description": "4個の注文をキャンセルすると、在庫が10に戻る"
+    },
+    {
+      "id": "T-005",
+      "file": "tests/proposed/test_reject_style.py",
+      "name": "test_reject_raises_out_of_stock_error",
+      "tag": "proposed",
+      "proposal": "PRP-001",
+      "relates": [
+        "REQ-004"
+      ],
+      "status": "red",
+      "description": "在庫不足の注文で OutOfStockError 例外が出る（提案A）",
+      "suspect": "改訂後の REQ-004（在庫分を提供し残りは納期を提示）と矛盾する。PRP-001 で候補Cが承認されたら削除する"
+    },
+    {
+      "id": "T-006",
+      "file": "tests/explore/test_order_boundary.py",
+      "name": "test_zero_quantity_does_not_change_stock",
+      "tag": "explore",
+      "relates": [
+        "REQ-003"
+      ],
+      "status": "red",
+      "description": "数量0の注文をしても在庫は5のまま変わらない"
+    }
+  ],
+  "proposals": [
+    {
+      "id": "PRP-001",
+      "requirement": "REQ-004",
+      "gap": "在庫数を超える注文の扱いが未規定（当初は REQ-004 の「拒否する」の方法）",
+      "status": "pending",
+      "candidates": [
+        {
+          "id": "A",
+          "summary": "OutOfStockError 例外を投げる",
+          "rationale": "呼び出し側が拒否を見落とせない。Pythonの慣習に合う",
+          "branch": null,
+          "spec": null,
+          "explore": null
+        },
+        {
+          "id": "B",
+          "summary": "結果オブジェクト（accepted=False, reason）を返す",
+          "rationale": "拒否が通常の業務結果として扱え、理由を画面に出しやすい",
+          "branch": null,
+          "spec": null,
+          "explore": null
+        },
+        {
+          "id": "C",
+          "summary": "在庫数分を提供し、残りは納期予定を提示して顧客に確認を求める",
+          "rationale": "nabepy の案（2026-11-06）。拒否せず販売機会を残せる。この案で設計書の REQ-004 を改訂済み",
+          "branch": null,
+          "spec": null,
+          "explore": null
+        }
+      ],
+      "chosen": null,
+      "reason": null,
+      "approved_by": null,
+      "note": "nabepy が候補Cを提示し、設計書を改訂した。承認の記録（chosen / reason / approved_by）は人間が書く"
+    },
+    {
+      "id": "PRP-002",
+      "requirement": "REQ-004",
+      "gap": "REQ-004 の納期予定の決め方が未規定",
+      "status": "pending",
+      "candidates": [
+        {
+          "id": "A",
+          "summary": "商品ごとに入荷予定日を登録し、それを納期予定にする",
+          "rationale": "実際の入荷に合った日付を出せる。入荷予定の登録が必要になる",
+          "branch": null,
+          "spec": null,
+          "explore": null
+        },
+        {
+          "id": "B",
+          "summary": "注文日に一定の日数（例: 7日）を足した日を納期予定にする",
+          "rationale": "仕組みが単純で、すぐ作れる。実際の入荷とずれることがある",
+          "branch": null,
+          "spec": null,
+          "explore": null
+        }
+      ],
+      "chosen": null,
+      "reason": null,
+      "approved_by": null
+    }
+  ],
   "_example": {
     "requirement": {
       "id": "REQ-001",
@@ -14,7 +190,9 @@
       "file": "tests/spec/test_order.py",
       "name": "test_place_rejects_when_out_of_stock",
       "tag": "spec",
-      "covers": ["REQ-001"],
+      "covers": [
+        "REQ-001"
+      ],
       "status": "red"
     },
     "test_proposed": {
@@ -37,13 +215,25 @@
       "gap": "REQ-001の拒否の方法が未規定",
       "status": "pending",
       "candidates": [
-        {"id": "A", "summary": "例外を投げる", "branch": "proposal/PRP-001-a", "spec": "12/12", "explore": "8/10"},
-        {"id": "B", "summary": "結果型で返す", "branch": "proposal/PRP-001-b", "spec": "12/12", "explore": "6/10"}
+        {
+          "id": "A",
+          "summary": "例外を投げる",
+          "branch": "proposal/PRP-001-a",
+          "spec": "12/12",
+          "explore": "8/10"
+        },
+        {
+          "id": "B",
+          "summary": "結果型で返す",
+          "branch": "proposal/PRP-001-b",
+          "spec": "12/12",
+          "explore": "6/10"
+        }
       ],
       "chosen": null,
       "reason": null,
       "approved_by": null
     },
-    "note": "このキーは検査に使われない。status は test が red/green、proposal が pending/approved/rejected。"
+    "note": "このキーは検査に使われない。status は test が red/green、proposal が pending/approved/rejected。 任意: テストの relates（関連する要求ID。covers と違いカバー扱いにしない）、suspect（逸脱疑いの理由）、提案の requirement（対象の要求ID）。 テストの description: 何を確かめるかの日本語の説明（マトリクスの列に表示）。"
   }
 }
