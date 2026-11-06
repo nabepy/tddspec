@@ -12,6 +12,7 @@
   セル ● = covers（spec がカバー）, ○ = relates（関連するだけでカバー扱いにしない）
 """
 import argparse
+import ast
 import html
 import json
 from datetime import datetime
@@ -69,7 +70,43 @@ td.c-out{background:var(--orange)}
 .card.sus{border-left:4px solid var(--red-bd)}
 .card h3{font-size:14px;margin:0 0 6px}
 .cands{margin:6px 0 0;padding-left:18px}
+.tcol .tid a{color:inherit}
+details.test{border:1px solid var(--line);border-radius:8px;margin:8px 0;padding:8px 12px}
+details.test.sus{border-left:4px solid var(--red-bd)}
+details.test summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+details.test summary code{font-size:13px;word-break:break-all}
+.intent{margin:8px 0;color:var(--fg)}
+pre{background:var(--head);border:1px solid var(--line);border-radius:6px;padding:10px;overflow-x:auto;font-size:12.5px;line-height:1.45;margin:6px 0 0}
+.tools{display:flex;gap:8px;margin-bottom:4px}
+.tools button{font:inherit;font-size:12px;padding:3px 10px;border:1px solid var(--line);border-radius:6px;background:var(--head);color:var(--fg);cursor:pointer}
 """
+
+
+def test_source(file, name):
+    """テスト関数の直前のコメントと本体のコードを返す。見つからなければ (None, None)。"""
+    path = ROOT / (file or "")
+    try:
+        text = path.read_text(encoding="utf-8")
+        tree = ast.parse(text)
+    except (OSError, SyntaxError):
+        return None, None
+    lines = text.splitlines()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
+            start = min([node.lineno] + [d.lineno for d in node.decorator_list]) - 1
+            comments = []
+            i = start - 1
+            while i >= 0 and lines[i].strip().startswith("#"):
+                comments.insert(0, lines[i].strip().lstrip("#").strip())
+                i -= 1
+            doc = ast.get_docstring(node)
+            if doc:
+                comments.append(doc)
+            code = "\n".join(lines[start:node.end_lineno])
+            indent = min((len(l) - len(l.lstrip()) for l in code.splitlines() if l.strip()), default=0)
+            code = "\n".join(l[indent:] for l in code.splitlines())
+            return comments, f"{code}\n（{file} の {start + 1}〜{node.end_lineno}行目）"
+    return None, None
 
 
 def esc(s):
@@ -103,9 +140,10 @@ def build(data):
         elif not cov:
             cls += " orphan"
         st = t.get("status", "?")
-        title = f'{t.get("file")}::{t.get("name")}'
+        comments, _ = test_source(t.get("file"), t.get("name"))
+        title = f'{t.get("file")}::{t.get("name")}' + ("\n" + "\n".join(comments) if comments else "")
         head.append(
-            f'<th class="{cls}" title="{esc(title)}"><div class="tid">{esc(t.get("id"))}</div>'
+            f'<th class="{cls}" title="{esc(title)}"><div class="tid"><a href="#{esc(t.get("id"))}">{esc(t.get("id"))}</a></div>'
             f'<span class="badge tag-{esc(t.get("tag"))}">{esc(TAG_LABEL.get(t.get("tag"), t.get("tag")))}</span><br>'
             f'<span class="badge st-{esc(st)}">{esc(st).upper()}</span></th>'
         )
@@ -162,6 +200,27 @@ def build(data):
         f'<div>{esc(t.get("suspect"))}</div><div class="muted">{esc(t.get("file"))}</div></div>'
         for t in tests if t.get("suspect")
     ]
+    details = []
+    for t in tests:
+        comments, code = test_source(t.get("file"), t.get("name"))
+        cov, rel = links(t)
+        meta = [f'<span class="badge tag-{esc(t.get("tag"))}">{esc(t.get("tag"))}</span>',
+                f'<span class="badge st-{esc(t.get("status"))}">{esc(t.get("status", "?")).upper()}</span>']
+        if cov:
+            meta.append(f'<span class="muted">covers {esc(", ".join(sorted(cov)))}</span>')
+        if rel:
+            meta.append(f'<span class="muted">relates {esc(", ".join(sorted(rel)))}</span>')
+        if t.get("proposal"):
+            meta.append(f'<span class="muted">proposal {esc(t.get("proposal"))}</span>')
+        intent = "".join(f"<div>{esc(c)}</div>" for c in (comments or []))
+        body = f'<pre><code>{esc(code)}</code></pre>' if code else '<p class="flag red">テストのコードが見つかりません</p>'
+        cls = "test sus" if t.get("suspect") else "test"
+        details.append(
+            f'<details class="{cls}" id="{esc(t.get("id"))}"><summary><b>{esc(t.get("id"))}</b> '
+            f'<code>{esc(t.get("name"))}</code> {" ".join(meta)}</summary>'
+            f'<div class="intent">{intent}</div>{body}</details>'
+        )
+
     unknown = sorted({c for t in tests for c in (t.get("relates") or [])} - req_ids)
 
     n_red = sum(1 for t in tests if t.get("status") == "red")
@@ -191,9 +250,18 @@ def build(data):
 <div class="stats">{stat_html}</div>
 <div class="legend">{legend}</div>{warn}
 <div class="wrap"><table><thead><tr>{"".join(head)}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>
+<h2>テストの内容</h2>
+<p class="muted">表頭のテストIDを押すと該当のテストが開きます。コメントはテスト関数の直前の # 行から読み取っています。</p>
+<div class="tools"><button type="button" onclick="document.querySelectorAll('details.test').forEach(d=>d.open=true)">すべて開く</button>
+<button type="button" onclick="document.querySelectorAll('details.test').forEach(d=>d.open=false)">すべて閉じる</button></div>
+{"".join(details)}
 <h2>承認待ちの提案</h2>{"".join(cards) or '<p class="muted">なし</p>'}
 <h2>逸脱疑い（spec を優先し、人間が判断する）</h2>{"".join(sus_cards) or '<p class="muted">なし</p>'}
-</main></body></html>
+</main>
+<script>
+function openTarget(){{var d=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(d&&d.tagName==="DETAILS")d.open=true;}}
+window.addEventListener("hashchange",openTarget);openTarget();
+</script></body></html>
 """
 
 
