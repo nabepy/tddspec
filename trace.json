@@ -42,7 +42,8 @@
         "REQ-001",
         "REQ-002"
       ],
-      "status": "red"
+      "status": "red",
+      "description": "商品を登録すると在庫数を照会でき、同じSKUを再登録すると在庫数が上書きされる"
     },
     {
       "id": "T-002",
@@ -52,7 +53,8 @@
       "covers": [
         "REQ-003"
       ],
-      "status": "red"
+      "status": "red",
+      "description": "在庫10に10個注文すると受け付けられ、注文IDが返り、在庫が0になる"
     },
     {
       "id": "T-003",
@@ -62,7 +64,8 @@
       "covers": [
         "REQ-004"
       ],
-      "status": "red"
+      "status": "red",
+      "description": "在庫10に11個注文すると拒否され、在庫は10のまま変わらない"
     },
     {
       "id": "T-004",
@@ -72,7 +75,8 @@
       "covers": [
         "REQ-005"
       ],
-      "status": "red"
+      "status": "red",
+      "description": "4個の注文をキャンセルすると、在庫が10に戻る"
     },
     {
       "id": "T-005",
@@ -83,7 +87,8 @@
       "relates": [
         "REQ-004"
       ],
-      "status": "red"
+      "status": "red",
+      "description": "在庫不足の注文で OutOfStockError 例外が出る（提案A）"
     },
     {
       "id": "T-006",
@@ -93,7 +98,8 @@
       "relates": [
         "REQ-003"
       ],
-      "status": "red"
+      "status": "red",
+      "description": "数量0の注文をしても在庫は5のまま変わらない"
     },
     {
       "id": "T-007",
@@ -104,7 +110,8 @@
         "REQ-004"
       ],
       "status": "red",
-      "suspect": "REQ-004（在庫を超える注文は拒否し、在庫は変わらない）と矛盾する。spec を優先し、人間に報告済み"
+      "suspect": "REQ-004（在庫を超える注文は拒否し、在庫は変わらない）と矛盾する。spec を優先し、人間に報告済み",
+      "description": "在庫5に8個注文すると在庫分だけ受け付け、在庫が0になる（REQ-004と矛盾）"
     }
   ],
   "proposals": [
@@ -191,6 +198,6 @@
       "reason": null,
       "approved_by": null
     },
-    "note": "このキーは検査に使われない。status は test が red/green、proposal が pending/approved/rejected。 任意: テストの relates（関連する要求ID。covers と違いカバー扱いにしない）、suspect（逸脱疑いの理由）、提案の requirement（対象の要求ID）。"
+    "note": "このキーは検査に使われない。status は test が red/green、proposal が pending/approved/rejected。 任意: テストの relates（関連する要求ID。covers と違いカバー扱いにしない）、suspect（逸脱疑いの理由）、提案の requirement（対象の要求ID）。 テストの description: 何を確かめるかの日本語の説明（マトリクスの列に表示）。"
   }
 }

@@ -27,3 +27,4 @@
 - テストの `relates`: 関連する要求ID。`covers` と違いカバー扱いにしない（proposed / explore 用）。
 - テストの `suspect`: 逸脱疑いの理由。マトリクスで赤になる。
 - 提案の `requirement`: 対象の要求ID。
+- テストの `description`: 何を確かめるかの日本語の説明。マトリクスの列見出しに表示する。

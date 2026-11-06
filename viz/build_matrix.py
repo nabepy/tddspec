@@ -31,7 +31,7 @@ CSS = """
 *{box-sizing:border-box}
 body{margin:0;padding:24px 16px;background:var(--bg);color:var(--fg);
 font:14px/1.5 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
-main{max-width:1100px;margin:0 auto}
+main{max-width:1400px;margin:0 auto}
 h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px}
 .muted{color:var(--muted)}
 .stats{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
@@ -43,9 +43,10 @@ h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px}
 table{border-collapse:collapse;width:100%}
 th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:6px 8px;text-align:center;vertical-align:middle}
 th{background:var(--head);font-weight:600}
-th.req,td.req{text-align:left;min-width:260px;position:sticky;left:0;background:var(--bg);z-index:1}
+th.req,td.req{text-align:left;min-width:220px;position:sticky;left:0;background:var(--bg);z-index:1}
 thead th.req{background:var(--head)}
-.tcol{font-size:12px;min-width:84px}
+.tcol{font-size:12px;min-width:120px;max-width:170px;vertical-align:top}
+.tdesc{font-weight:400;text-align:left;margin-top:6px;line-height:1.4;color:var(--fg)}
 .tcol .tid{font-weight:700;font-size:13px}
 .badge{display:inline-block;font-size:11px;padding:0 6px;border-radius:10px;margin-top:2px}
 .st-red{background:var(--red);color:var(--red-fg)}.st-green{background:var(--green);color:var(--green-fg)}
@@ -145,7 +146,8 @@ def build(data):
         head.append(
             f'<th class="{cls}" title="{esc(title)}"><div class="tid"><a href="#{esc(t.get("id"))}">{esc(t.get("id"))}</a></div>'
             f'<span class="badge tag-{esc(t.get("tag"))}">{esc(TAG_LABEL.get(t.get("tag"), t.get("tag")))}</span><br>'
-            f'<span class="badge st-{esc(st)}">{esc(st).upper()}</span></th>'
+            f'<span class="badge st-{esc(st)}">{esc(st).upper()}</span>'
+            f'<div class="tdesc">{esc(t.get("description") or t.get("name"))}</div></th>'
         )
 
     rows = []
@@ -212,7 +214,8 @@ def build(data):
             meta.append(f'<span class="muted">relates {esc(", ".join(sorted(rel)))}</span>')
         if t.get("proposal"):
             meta.append(f'<span class="muted">proposal {esc(t.get("proposal"))}</span>')
-        intent = "".join(f"<div>{esc(c)}</div>" for c in (comments or []))
+        intent = (f'<div><b>{esc(t.get("description"))}</b></div>' if t.get("description") else "") + "".join(
+            f'<div class="muted">{esc(c)}</div>' for c in (comments or []))
         body = f'<pre><code>{esc(code)}</code></pre>' if code else '<p class="flag red">テストのコードが見つかりません</p>'
         cls = "test sus" if t.get("suspect") else "test"
         details.append(
@@ -251,7 +254,7 @@ def build(data):
 <div class="legend">{legend}</div>{warn}
 <div class="wrap"><table><thead><tr>{"".join(head)}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>
 <h2>テストの内容</h2>
-<p class="muted">表頭のテストIDを押すと該当のテストが開きます。コメントはテスト関数の直前の # 行から読み取っています。</p>
+<p class="muted">表頭のテストIDを押すと該当のテストが開きます。太字の説明は trace.json の description、その下はテスト関数の直前のコメントです。</p>
 <div class="tools"><button type="button" onclick="document.querySelectorAll('details.test').forEach(d=>d.open=true)">すべて開く</button>
 <button type="button" onclick="document.querySelectorAll('details.test').forEach(d=>d.open=false)">すべて閉じる</button></div>
 {"".join(details)}
